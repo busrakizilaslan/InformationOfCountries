@@ -19,10 +19,8 @@ class FragmentFeed : Fragment() {
     private lateinit var viewModel : FeedViewModel
     private val countryAdapter = CountryAdapter(arrayListOf())
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(
@@ -47,16 +45,14 @@ class FragmentFeed : Fragment() {
             val action = FragmentFeedDirections.actionFragmentFeedToFragmentCountries()
             Navigation.findNavController(it).navigate(action)
         }
-
          */
         swipeRefreshLayout.setOnRefreshListener {
             countryList.visibility = View.GONE
             countryError.visibility = View.GONE
             countryLoading.visibility = View.VISIBLE
-            viewModel.refreshData()
+            viewModel.refreshFromAPI()
             swipeRefreshLayout.isRefreshing = false
         }
-
         observeLiveData()
     }
 
@@ -86,11 +82,7 @@ class FragmentFeed : Fragment() {
                 }else{
                     countryLoading.visibility = View.GONE
                 }
-
             }
-
         })
     }
-
-
 }

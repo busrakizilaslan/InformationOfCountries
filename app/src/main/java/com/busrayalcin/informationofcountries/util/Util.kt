@@ -3,6 +3,7 @@ package com.busrayalcin.informationofcountries.util
 import android.content.Context
 import android.widget.ImageView
 import android.widget.ProgressBar
+import androidx.databinding.BindingAdapter
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.GlideContext
@@ -18,7 +19,6 @@ fun ImageView.downloadFromUrl(url : String?, progressDrawable: CircularProgressD
         .setDefaultRequestOptions(options)
         .load(url)
         .into(this)
-
 }
 
 fun progressBarForPlaceHolder(context: Context) : CircularProgressDrawable{
@@ -27,5 +27,9 @@ fun progressBarForPlaceHolder(context: Context) : CircularProgressDrawable{
         centerRadius = 40f
         start()
     }
+}
 
+@BindingAdapter("android:downloadUrl")
+fun downloadImage(view : ImageView, url: String?){
+    view.downloadFromUrl(url, progressBarForPlaceHolder(view.context))
 }

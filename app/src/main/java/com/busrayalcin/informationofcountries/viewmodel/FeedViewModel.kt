@@ -1,6 +1,7 @@
 package com.busrayalcin.informationofcountries.viewmodel
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.busrayalcin.informationofcountries.model.Country
@@ -18,13 +19,31 @@ class FeedViewModel(application: Application) : BaseViewModel(application) {
     private val countryAPIService = CountryAPIService()
     private val disposable = CompositeDisposable()
     private var customSharedPreferences = CustomSharedPreferences(getApplication())
+    private var refreshTime = 10 * 60 * 1000 * 1000 * 1000L
 
     val countries = MutableLiveData<List<Country>>()
     val countryError = MutableLiveData<Boolean>()
     val countryLoading = MutableLiveData<Boolean>()
 
     fun refreshData(){
+        val updateTime = customSharedPreferences?.getTime()
+        if (updateTime != null && updateTime != 0L && System.nanoTime() - updateTime < refreshTime){
+            getDataFromSQLite()
+        }else{
+            getDataFromAPI()
+        }
+    }
+
+    fun refreshFromAPI() {
         getDataFromAPI()
+    }
+    private fun getDataFromSQLite(){
+        countryLoading.value = true
+        launch {
+            val countries = CountryDB(getApplication()).countryDao().getCountries()
+            showCountries(countries)
+            Toast.makeText(getApplication(),"Countries from SQLite",Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun getDataFromAPI(){
@@ -36,7 +55,7 @@ class FeedViewModel(application: Application) : BaseViewModel(application) {
                 .subscribeWith(object : DisposableSingleObserver<List<Country>>(){
                     override fun onSuccess(t: List<Country>) {
                         storeInSQLite(t)
-
+                        Toast.makeText(getApplication(),"Countries from API",Toast.LENGTH_LONG).show()
                     }
 
                     override fun onError(e: Throwable) {
@@ -53,6 +72,7 @@ class FeedViewModel(application: Application) : BaseViewModel(application) {
         countryError.value = false
         countryLoading.value = false
     }
+
     private fun storeInSQLite(list : List<Country>){
         launch {
             val dao = CountryDB(getApplication()).countryDao()
@@ -66,7 +86,10 @@ class FeedViewModel(application: Application) : BaseViewModel(application) {
             showCountries(list)
         }
         customSharedPreferences?.saveTime(System.nanoTime())
+    }
 
-
+    override fun onCleared() {
+        super.onCleared()
+        disposable.clear()
     }
 }

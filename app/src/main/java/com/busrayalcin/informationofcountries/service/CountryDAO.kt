@@ -13,7 +13,7 @@ interface CountryDAO {
     @Query("SELECT * FROM country")
     suspend fun getCountries() : List<Country>
 
-    @Query("SELECT * FROM country WHERE uuid = : countryId")
+    @Query("SELECT * FROM country WHERE uuid = :countryId")
     suspend fun getCountry(countryId : Int) : Country
 
     @Query("DELETE FROM country")
